@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="LivrariaApi/LivrariaApi.csproj" />
+  <Project Path="LivrariaApp/LivrariaApp.csproj" />
+  <Project Path="LivrariaCore/LivrariaCore.csproj" />
+</Solution>
