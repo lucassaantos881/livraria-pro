@@ -7,67 +7,40 @@ namespace LivrariaCore.Models
     public abstract class Produto
     {
 
-        protected string nome = string.Empty;
-        public string Nome
+        //O EFCORE PRECISA DE CONSTRUTOR VAZIO PARA RECRIAR OBJETOS DO BANCO DE DADOS, POR ISSO ELE É PROTEGIDO PARA QUE NINGUÉM FORA DA CLASSE POSSA USÁ-LO
+        protected Produto()
         {
-            get { return nome; }
-
-            set
-            {
-
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    nome = value;
-                }
-                else
-                {
-                    throw new ArgumentException("ERRO: Autor não pode ser vazio!!");
-                }
-            }
-
-
         }
 
-        protected double preco;
-        public double Preco
+        protected Produto(string nome, double preco, int quantidade)
         {
-            get { return preco; }
-
-            set
+            //OBJETO SÓ EXISTE SE TODOS OS DADOS FOREM VÁLIDOS
+            if (string.IsNullOrEmpty(nome))
             {
-                if (value < 0)
-                {
-                    throw new ArgumentException("ERRO: Preco nao pode ser negativo");
-                }
-                preco = value;
+                throw new ArgumentException("ERRO: NOME NÃO PODE SER VAZIO");
             }
 
-        }
-
-        protected int quantidade;
-
-        public int Quantidade
-        {
-            get { return quantidade; }
-
-            set
+            if(preco < 0)
             {
-                if (value < 0)
-                {
-                    throw new ArgumentException("ERRO: Preco nao pode ser negativo");
-                }
-                quantidade = value;
+                throw new ArgumentException("ERRO: PREÇO NÃO PODE SER NEGATIVO");
             }
 
-        }
+            if (quantidade < 0)
+            {
+                throw new ArgumentException("ERRO: QUANTIDADE NÃO PODE SER NEGATIVA");
+            }
+            
 
-        public Produto(string nome, double preco, int quantidade)
-        {
             Nome = nome;
             Preco = preco;
             Quantidade = quantidade;
         }
 
+        //GET QUALQUER UM PODE LER, AGORA O SET APENAS A CLASSE OU CLASSES FILHAS PODEM ALTERAR
+        public string Nome { get; protected set; } = string.Empty;
+        public double Preco { get; protected set; }
+
+        public int Quantidade { get; protected set; }
 
     }
 }

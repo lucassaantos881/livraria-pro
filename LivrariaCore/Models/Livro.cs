@@ -6,52 +6,32 @@ namespace LivrariaCore.Models
 {
     public abstract class Livro : Produto
     {
-        protected int id;
-        public int Id
+      
+        protected Livro()
         {
-
-
-            get { return id; }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentException("ERRO: Id não pode ser negativo!!");
-                }
-                id = value;
-            }
-
-        }
-
-
-        protected string autor = string.Empty;
-        public string Autor
-        {
-
-            get { return autor; }
-
-            set
-            {
-
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    autor = value;
-                }
-                else
-                {
-                    throw new ArgumentException("ERRO: Autor não pode ser vazio!!");
-                }
-            }
-
-
         }
 
         public Livro(int id, string nome, double preco, string autor, int quantidade) : base(nome, preco, quantidade)
         {
+
+            //OBJETO SÓ EXISTE SE TODOS OS DADOS FOREM VÁLIDOS
+            if (id < 0)
+            {
+                throw new ArgumentException("ERRO: ID NÃO PODE SER NEGATIVO");
+            }
+
+            if(string.IsNullOrEmpty(autor))
+            { 
+                throw new ArgumentException("ERRO: AUTOR NÃO PODE SER VAZIO");
+            }
+
             Id = id;
             Autor = autor;
         }
 
+        public int Id { get; protected set; }
+        public string Autor { get; protected set; } = string.Empty;
+        
 
         public abstract double CalculoPrecoUnitario();
 
