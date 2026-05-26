@@ -7,6 +7,7 @@ namespace LivrariaCore.Models
     public class LivroDigital : Livro
     {
 
+        protected LivroDigital() { }
         
 
         public LivroDigital(int id, string nome, double preco, string autor, string formato, int quantidade) : base(id, nome, preco, autor, quantidade)
@@ -14,7 +15,7 @@ namespace LivrariaCore.Models
             Formato = formato;
         }
 
-        public string Formato { get; private set; } = string.Empty;
+        public string Formato { get; set; } = string.Empty;
         public override double CalculoPrecoUnitario()
         {
 

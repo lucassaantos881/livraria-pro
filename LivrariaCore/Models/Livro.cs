@@ -29,8 +29,8 @@ namespace LivrariaCore.Models
             Autor = autor;
         }
 
-        public int Id { get; protected set; }
-        public string Autor { get; protected set; } = string.Empty;
+        public int Id { get; set; }
+        public string Autor { get; set; } = string.Empty;
         
 
         public abstract double CalculoPrecoUnitario();

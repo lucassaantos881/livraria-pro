@@ -37,10 +37,10 @@ namespace LivrariaCore.Models
         }
 
         //GET QUALQUER UM PODE LER, AGORA O SET APENAS A CLASSE OU CLASSES FILHAS PODEM ALTERAR
-        public string Nome { get; protected set; } = string.Empty;
-        public double Preco { get; protected set; }
+        public string Nome { get; set; } = string.Empty;
+        public double Preco { get; set; }
 
-        public int Quantidade { get; protected set; }
+        public int Quantidade { get; set; }
 
     }
 }

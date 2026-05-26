@@ -14,7 +14,7 @@ namespace LivrariaCore.Models
             TipoCapa = tipoCapa;
         }
 
-        public string TipoCapa { get; private set; } = string.Empty;
+        public string TipoCapa { get;  set; } = string.Empty;
         public override double CalculoPrecoUnitario()
         {
 
