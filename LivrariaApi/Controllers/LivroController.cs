@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using LivrariaCore.Models;
-using LivrariaApi.Data;
 using LivrariaCore.DTO_s;
+using LivrariaApi.Services;
 
 namespace LivrariaApi.Controllers
 {
@@ -10,20 +10,19 @@ namespace LivrariaApi.Controllers
     [ApiController]
     public class LivroController : ControllerBase
     {
-        private readonly LivrariaContext _context;
+        private readonly ILivroService _livroService;
 
-        //Injeção de dependência do contexto do banco de dados, onde o controlador utiliza o contexto criado pelo Program.cs e assim poder utilizar o banco.
-        //O construtor recebe o contexto e armazena em um campo privado para uso nos métodos do controlador
-        public LivroController(LivrariaContext context)
+        // O Controller não conhece mais o banco — só o Service
+        public LivroController(ILivroService livroService)
         {
-            _context = context;
+            _livroService = livroService;
         }
 
         //Retorna a lista completa de livros cadastrados no navegador.
         [HttpGet]
         public ActionResult<IEnumerable<Livro>> Get()
         {
-            return Ok(_context.Livros.ToList());
+            return Ok(_livroService.ObterTodosLivros());
         }
 
 
@@ -32,9 +31,9 @@ namespace LivrariaApi.Controllers
         public ActionResult<Livro> Get(int id)
         {
             //Busca o livro na lista usando o método, que retorna o primeiro livro que satisfaz a condição
-            var livro = _context.Livros.FirstOrDefault(l => l.Id == id);
+            var livro = _livroService.ObterLivroPeloId(id);
 
-            if(livro == null) { 
+            if (livro == null) { 
             
                 return NotFound();
             }
@@ -46,14 +45,22 @@ namespace LivrariaApi.Controllers
         public ActionResult<Livro> GetLivrosDigitais()
         {
             //Percorre a lista e analisa se o tipo é digital, caso seja verdadeiro, é armazenado em uma nova lista...
-            var livrosDigitais = _context.Livros.OfType<LivroDigital>();
+            var livrosDigitais = _livroService.ObterLivrosDigitais();
             return Ok(livrosDigitais);
+        }
+
+        [HttpGet("consultafisicos")]
+        public ActionResult<Livro> GetLivrosFisicos()
+        {
+            //Percorre a lista e analisa se o tipo é digital, caso seja verdadeiro, é armazenado em uma nova lista...
+            var livrosFisicos = _livroService.ObterLivrosFisicos();
+            return Ok(livrosFisicos);
         }
 
 
         //Lógica para inserir livros do tipo físico por meio do POST, usado POSTMAN
         //Recebe um objeto do tipo LivroFisicoDTO, classe essa para transferência de dados, analisando se é nulo ou não
-        //Caso não seja nulo, é criado um objeto do tipo livrofisico e armazenado no banco de dados, retornando o status 201 Created, mostrando a localização do respectivo livro
+        //Caso não seja nulo, é criado um objeto do tipo livrofisico e é validado se todos os dados entregues pelo DTO estão corretos, onde caso esteja, será adicionado no banco, retornando o status 201 Created, mostrando a localização do respectivo livro
         [HttpPost("fisicos")]
         public ActionResult Post([FromBody] LivroFisicoDTO fisicoDTO)
         {
@@ -62,12 +69,9 @@ namespace LivrariaApi.Controllers
                 return BadRequest();
             }
 
-            LivroFisico livroFisico = new(fisicoDTO.ID, fisicoDTO.Nome, fisicoDTO.Preco, fisicoDTO.Autor, fisicoDTO.TipoCapa, fisicoDTO.Quantidade);
+            _livroService.AdicionarLivroFisico(fisicoDTO);
 
-            _context.Livros.Add(livroFisico);
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(Get), new { id = livroFisico.Id }, livroFisico);
+            return CreatedAtAction(nameof(Get), new { id = fisicoDTO.ID }, fisicoDTO);
 
         }
 
@@ -80,11 +84,46 @@ namespace LivrariaApi.Controllers
                 return BadRequest();
             }
 
-            LivroDigital livroDigital = new(digitalDto.ID, digitalDto.Nome, digitalDto.Preco, digitalDto.Autor, digitalDto.Formato, digitalDto.Quantidade);
+            _livroService.AdicionarLivroDigital(digitalDto);
+            
+            return CreatedAtAction(nameof(Get), new { id = digitalDto.ID }, digitalDto);
+        }
 
-            _context.Livros.Add(livroDigital);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(Get), new { id = livroDigital.Id }, livroDigital);
+        [HttpPut("fisicos/{id}")]
+        public ActionResult Put(int id, [FromBody] LivroFisicoDTO fisicoDto)
+        {
+            if (fisicoDto == null)
+            {
+                return BadRequest();
+            }
+
+            _livroService.AtualizarLivroFisico(id, fisicoDto);
+            return NoContent();
+        }
+
+
+        [HttpPut ("digitais/{id}")]
+        public ActionResult Put(int id, [FromBody] LivroDigitalDTO digitalDto)
+        {
+            if (digitalDto == null)
+            {
+                return BadRequest();
+            }
+
+            _livroService.AtualizarLivroDigital(id, digitalDto);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<Livro> Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+
+            _livroService.ExcluirLivro(id);
+            return NoContent();
         }
 
     } 

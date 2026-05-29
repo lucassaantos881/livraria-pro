@@ -1,4 +1,5 @@
 using LivrariaApi.Data;
+using LivrariaApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 //especificamente a chave "DefaultConnection"
 builder.Services.AddDbContext<LivrariaContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ILivroService, LivroService>();
 
 builder.Services.AddControllers();
 
