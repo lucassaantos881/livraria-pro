@@ -19,7 +19,6 @@ namespace LivrariaCore.Models
         public override double CalculoPrecoUnitario()
         {
 
-            
             return Preco - (Preco * 0.15);
         }
 

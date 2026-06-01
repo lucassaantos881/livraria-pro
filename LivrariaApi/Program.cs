@@ -15,8 +15,14 @@ builder.Services.AddDbContext<LivrariaContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ILivroService, LivroService>();
+builder.Services.AddScoped<IPedidoService, PedidoService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters
+    .Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 
 var app = builder.Build();
 

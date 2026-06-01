@@ -21,6 +21,8 @@ namespace LivrariaApi.Data
         public DbSet<LivroFisico> LivrosFisicos { get; set; }
         public DbSet<LivroDigital> LivrosDigitais { get; set; }
         
+        public DbSet<Pedido> Pedidos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configura o mapeamento para a hierarquia de classes Livro, LivroFisico e LivroDigital
@@ -28,7 +30,14 @@ namespace LivrariaApi.Data
                 .HasDiscriminator<string>("TipoLivro")
                 .HasValue<LivroFisico>("Fisico")
                 .HasValue<LivroDigital>("Digital");
+
+            //Configura para que o enum StatusPedido seja armazenado como string no banco ao invés de valor numérico
+            modelBuilder.Entity<Pedido>()
+                .Property(p => p.StatusPedido)
+                .HasConversion<string>();
+            
         }
 
+        
     }
 }
