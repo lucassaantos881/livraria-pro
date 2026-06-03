@@ -48,6 +48,12 @@ namespace LivrariaApi.Services
             var pedidoLocalizado = _context.Pedidos
                                     .Include(p => p.Livros)
                                     .FirstOrDefault(p => p.Id == id);
+
+            if (pedidoLocalizado == null)
+            {
+                throw new ArgumentException(nameof(id), "ERRO: PEDIDO NÃO ENCONTRADO");
+            }
+
             return pedidoLocalizado;
         }
 
@@ -105,6 +111,13 @@ namespace LivrariaApi.Services
                 .Include(p => p.Livros) //Carrega os livros relacionados ao pedido
                 .FirstOrDefault(p => p.Id == id); //Filtra pelo Id
             
+
+            if (pedido == null)
+            {
+                throw new ArgumentException(nameof(id), "ERRO: PEDIDO NÃO ENCONTRADO");
+
+            }
+
             return pedido?.CalcularTotal() ?? 0;
         }
         
