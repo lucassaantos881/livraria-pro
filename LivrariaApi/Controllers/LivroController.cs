@@ -41,7 +41,7 @@ namespace LivrariaApi.Controllers
             return Ok(livro);
         }
 
-        [HttpGet("consultadigital")]
+        [HttpGet("consultadigitais")]
         public ActionResult<Livro> GetLivrosDigitais()
         {
             //Percorre a lista e analisa se o tipo é digital, caso seja verdadeiro, é armazenado em uma nova lista...

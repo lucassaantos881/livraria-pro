@@ -1,6 +1,7 @@
 using LivrariaApi.Data;
 using LivrariaApi.Services;
 using Microsoft.EntityFrameworkCore;
+using LivrariaApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +25,27 @@ builder.Services.AddControllers()
     .Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 });
 
+builder.Services.AddCors(options =>
+{
+
+    options.AddPolicy("BlazorPolicy", policy =>
+    {
+        policy.WithOrigins("https://localhost:7202") // Porta do Blazor WebAssembly
+              .AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+
+
+    });
+});
+
+
 var app = builder.Build();
 
+app.UseCors("BlazorPolicy");
+
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 

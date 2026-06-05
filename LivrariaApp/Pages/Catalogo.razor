@@ -1,0 +1,153 @@
+﻿@page "/catalogo"
+@using LivrariaCore.Models
+@inject HttpClient Http
+
+<h3>Catalogo de Livros</h3>
+
+@if (livrosFisicos == null)
+{
+   <p>Carregando...</p>    
+
+}
+else
+{
+    <h3>Livros Fisicos</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Titulo</th>
+                <th>Autor</th>
+                <th>Formato Capa</th>
+                <th>Preço</th>
+                <th>Preço com Frete</th>
+                <th>Quantidade</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+            @foreach(var fisico in livrosFisicos!)
+            {
+                <tr>
+                    <td>@fisico.Id</td>
+                    <td>@fisico.Nome</td>
+                    <td>@fisico.Autor</td>
+                    <td>@fisico.TipoCapa</td>
+                    <td>@fisico.Preco</td>
+                    <td>R$ @fisico.CalculoPrecoUnitario().ToString("N2")</td>
+                    <td>@fisico.Quantidade</td>
+
+
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <h3>Livros Digitais</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Autor</th>
+                <th>Formato</th>
+                <th>Preço</th>
+                <th>Preço com Desconto</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var digitais in livrosDigitais!)
+            {
+                <tr>
+                    <td>@digitais.Id</td>
+                    <td>@digitais.Nome</td>
+                    <td>@digitais.Autor</td>
+                    <td>@digitais.Formato</td>
+                    <td>@digitais.Preco</td>
+                    <td>R$ @digitais.CalculoPrecoUnitario().ToString("N2")</td>
+                    <td>@digitais.Quantidade</td>
+                </tr>
+            }
+        </tbody>
+    
+    </table>
+
+    <hr />
+
+    <h3>Buscar Livro por ID</h3>
+    <input @bind = "idBusca" placeholder="ID do Livro" />
+
+    <button @onclick= "BuscarLivro">Buscar</button>
+
+    @if (livroBuscado != null)
+    {
+        @if (livroBuscado is LivroFisico)
+        {
+            <p>Livro fisico encontrado:</p>
+            <p>Nome: @livroBuscado.Nome</p>
+            <p>Autor: @livroBuscado.Autor</p>
+            <p>Preço: R$@livroBuscado.Preco</p>
+            <p>Quantidade: @livroBuscado.Quantidade</p>
+
+            <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
+        }
+        else if (livroBuscado is LivroDigital)
+        {
+            <p>Livro digital encontrado:</p>
+            <p>Nome: @livroBuscado.Nome</p>
+            <p>Autor: @livroBuscado.Autor</p>
+            <p>Preço: R$ @livroBuscado.Preco</p>
+            <p>Quantidade: @livroBuscado.Quantidade</p>
+
+            <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
+        }
+    }
+
+}
+
+
+@code {
+
+    private List<LivroFisico>? livrosFisicos;
+    private List<LivroDigital>? livrosDigitais;
+
+    private int idBusca;
+    //private LivroFisico? livroFisicoBuscado;
+    //private LivroDigital? livroDigitalBuscado;
+
+    private Livro? livroBuscado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Chama a API e armazena na Lista
+        livrosFisicos = await Http.GetFromJsonAsync<List<LivroFisico>>("https://localhost:7020/api/livro/consultafisicos");
+        livrosDigitais = await Http.GetFromJsonAsync<List<LivroDigital>>("https://localhost:7020/api/livro/consultadigitais");
+
+
+    }
+
+    private async Task BuscarLivro(){
+        if(idBusca <= 0)
+        {
+            livroBuscado = null;
+            return;
+        }
+        else
+        {
+            livroBuscado = livrosFisicos?.FirstOrDefault(f => f.Id == idBusca);
+
+            if (livroBuscado == null)
+            {
+                livroBuscado = livrosDigitais?.FirstOrDefault(d => d.Id == idBusca);
+            }
+
+           
+
+        }
+    }
+
+
+}
