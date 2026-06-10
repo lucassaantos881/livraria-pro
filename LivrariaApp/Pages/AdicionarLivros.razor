@@ -1,0 +1,151 @@
+﻿@page "/adicionar-livros"
+@using LivrariaCore.Models
+@using LivrariaCore.DTO_s
+@inject HttpClient Http
+
+<h3>Adicionar Livros</h3>
+
+      <select @bind="tipoLivro">
+            <option value="">Selecione o tipo</option>
+            <option value="Fisico">Físico</option>
+            <option value="Digital">Digital</option>
+      </select>
+
+
+      @if(tipoLivro == "Fisico"){
+          
+        <EditForm Model="tipoLivroFisico" OnValidSubmit="CadastroLivro">
+            <DataAnnotationsValidator />
+        
+            <span>Digite o ID do livro: </span>
+            <input type="number" placeholder="Id Livro" @bind="tipoLivroFisico.ID" />
+            <hr />
+
+            <span>Digite o nome do livro: </span>
+            <input type="text" placeholder="Nome do Livro" @bind="tipoLivroFisico.Nome" />
+            <hr />
+
+            <span>Digite o autor do livro: </span>
+            <input type="text" placeholder="Autor do Livro" @bind="tipoLivroFisico.Autor" />
+            <hr />
+
+            <span>Digite o preço do livro: </span>
+            <input type="number" placeholder="Preço do Livro" @bind="tipoLivroFisico.Preco" />
+            <hr />
+
+            <span>Digite o tipo de capa do livro: </span>
+            <input type="text" placeholder="Tipo de Capa" @bind="tipoLivroFisico.TipoCapa" />
+            <hr />
+
+            <span>Digite a quantidade do livro: </span>
+            <input type="number" placeholder="Quantidade" @bind="tipoLivroFisico.Quantidade" />
+            <hr />
+
+            <button type="submit">Adicionar Livro</button>
+            <br />
+
+        
+            <ValidationSummary />
+        </EditForm>
+      }else if(tipoLivro == "Digital"){
+        <EditForm Model="tipoLivroDigital" OnValidSubmit="CadastroLivro">
+
+            <DataAnnotationsValidator />
+
+            <span>Digite o ID do livro: </span>
+            <input type="number" placeholder="Id Livro" @bind="tipoLivroDigital.ID" />
+            <hr />
+
+            <span>Digite o nome do livro: </span>
+            <input type="text" placeholder="Nome do Livro" @bind="tipoLivroDigital.Nome" />
+            <hr />
+
+            <span>Digite o autor do livro: </span>
+            <input type="text" placeholder="Autor do Livro" @bind="tipoLivroDigital.Autor" />
+            <hr />
+
+            <span>Digite o preço do livro: </span>
+            <input type="number" placeholder="Preço do Livro" @bind="tipoLivroDigital.Preco" />
+            <hr />
+
+            <span>Digite o formato do livro: </span>
+            <input type="text" placeholder="Formato" @bind="tipoLivroDigital.Formato" />
+            <hr />
+
+            <span>Digite a quantidade do livro: </span>
+            <input type="number" placeholder="Quantidade" @bind="tipoLivroDigital.Quantidade" />
+            <hr />
+
+            <button type="submit">Adicionar Livro</button>
+            <br />
+
+
+
+
+            <ValidationSummary />
+
+        </EditForm>
+      }
+
+    
+
+    
+
+
+
+
+
+    @if (!string.IsNullOrWhiteSpace(mensagem))
+    {
+        if (sucesso)
+        {
+            <div class="alert alert-success">@mensagem</div>
+        }
+        else
+        {
+            <div class="alert alert-danger">@mensagem</div>
+        }
+
+
+
+    }
+
+
+@code {
+
+    private string tipoLivro = string.Empty;
+
+    private bool sucesso = false;
+    private string mensagem = string.Empty;
+
+    private LivroFisicoDTO tipoLivroFisico = new LivroFisicoDTO();
+    private LivroDigitalDTO tipoLivroDigital = new LivroDigitalDTO();
+
+    private async Task CadastroLivro()
+    {
+
+        //FAZ POST PARA A API, COMO SE FOSSE NO POSTMAN, PASSANDO O OBJETO DO LIVRO FÍSICO COMO JSON
+        var respostaFisico = await Http.PostAsJsonAsync("https://localhost:7020/api/livro/fisicos", tipoLivroFisico);
+        var respostaDigital = await Http.PostAsJsonAsync("https://localhost:7020/api/livro/digitais", tipoLivroDigital);
+
+        if (respostaFisico.IsSuccessStatusCode)
+        {
+            sucesso = true;
+            mensagem = "Livro Físico Adicionado com Sucesso!!";
+
+
+        }
+        else if (respostaDigital.IsSuccessStatusCode)
+        {
+            sucesso = true;
+            mensagem = "Livro Digital Adicionado com Sucesso!!";
+        }
+        else
+        {
+            sucesso = false;
+            mensagem = "Erro ao adicionar o livro. Tente novamente.";
+        }
+    }
+
+
+}

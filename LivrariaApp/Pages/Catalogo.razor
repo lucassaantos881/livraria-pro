@@ -66,7 +66,7 @@ else
                     <td>@digitais.Nome</td>
                     <td>@digitais.Autor</td>
                     <td>@digitais.Formato</td>
-                    <td>@digitais.Preco</td>
+                    <td>@digitais.Preco.ToString("N2")</td>
                     <td>R$ @digitais.CalculoPrecoUnitario().ToString("N2")</td>
                     <td>@digitais.Quantidade</td>
                 </tr>
@@ -89,7 +89,7 @@ else
             <p>Livro fisico encontrado:</p>
             <p>Nome: @livroBuscado.Nome</p>
             <p>Autor: @livroBuscado.Autor</p>
-            <p>Preço: R$@livroBuscado.Preco</p>
+            <p>Preço: R$@livroBuscado.Preco.ToString("N2")</p>
             <p>Quantidade: @livroBuscado.Quantidade</p>
 
             <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
@@ -99,7 +99,7 @@ else
             <p>Livro digital encontrado:</p>
             <p>Nome: @livroBuscado.Nome</p>
             <p>Autor: @livroBuscado.Autor</p>
-            <p>Preço: R$ @livroBuscado.Preco</p>
+            <p>Preço: R$ @livroBuscado.Preco.ToString("N2")</p>
             <p>Quantidade: @livroBuscado.Quantidade</p>
 
             <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
@@ -115,8 +115,6 @@ else
     private List<LivroDigital>? livrosDigitais;
 
     private int idBusca;
-    //private LivroFisico? livroFisicoBuscado;
-    //private LivroDigital? livroDigitalBuscado;
 
     private Livro? livroBuscado;
 
