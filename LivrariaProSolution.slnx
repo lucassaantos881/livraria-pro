@@ -2,4 +2,5 @@
   <Project Path="LivrariaApi/LivrariaApi.csproj" />
   <Project Path="LivrariaApp/LivrariaApp.csproj" />
   <Project Path="LivrariaCore/LivrariaCore.csproj" />
+  <Project Path="LivrariaTests/LivrariaTests.csproj" Id="8339e026-61e1-4bac-b9b3-9618498367b1" />
 </Solution>
