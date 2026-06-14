@@ -2,6 +2,14 @@ using LivrariaApi.Data;
 using LivrariaApi.Services;
 using Microsoft.EntityFrameworkCore;
 using LivrariaApi.Middleware;
+using Serilog;
+
+//Configura o Serilog globalmente para a aplicação
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()                        //mostra no console
+    .WriteTo.File("Logs/log-.txt",            //salva em arquivo, com nome log-2024-06-01.txt, por exemplo
+        rollingInterval: RollingInterval.Day) //um arquivo novo por dia
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +22,8 @@ var builder = WebApplication.CreateBuilder(args);
 //especificamente a chave "DefaultConnection"
 builder.Services.AddDbContext<LivrariaContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Host.UseSerilog(); // Configura o Serilog como o logger para a aplicação
 
 builder.Services.AddScoped<ILivroService, LivroService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
