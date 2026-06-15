@@ -7,7 +7,7 @@
 
       <select @bind="tipoLivro">
             <option value="">Selecione o tipo</option>
-            <option value="Fisico">Físico</option>
+            <option value="Fisico">Fisico</option>
             <option value="Digital">Digital</option>
       </select>
 
@@ -124,27 +124,47 @@
     private async Task CadastroLivro()
     {
 
-        //FAZ POST PARA A API, COMO SE FOSSE NO POSTMAN, PASSANDO O OBJETO DO LIVRO FÍSICO COMO JSON
-        var respostaFisico = await Http.PostAsJsonAsync("https://localhost:7020/api/livro/fisicos", tipoLivroFisico);
-        var respostaDigital = await Http.PostAsJsonAsync("https://localhost:7020/api/livro/digitais", tipoLivroDigital);
 
-        if (respostaFisico.IsSuccessStatusCode)
+        Console.WriteLine($"Tipo selecionado: {tipoLivro}");
+
+
+        HttpResponseMessage resposta;
+
+        if (tipoLivro == "Fisico")
+        {
+            resposta = await Http.PostAsJsonAsync("https://localhost:7020/api/livro/fisicos", tipoLivroFisico);
+
+        }else
+        {
+            resposta = await Http.PostAsJsonAsync("https://localhost:7020/api/livro/digitais", tipoLivroDigital);
+        }
+
+
+        if (resposta.IsSuccessStatusCode)
         {
             sucesso = true;
-            mensagem = "Livro Físico Adicionado com Sucesso!!";
+            mensagem = "Livro Adicionado com Sucesso!!";
 
 
-        }
-        else if (respostaDigital.IsSuccessStatusCode)
-        {
-            sucesso = true;
-            mensagem = "Livro Digital Adicionado com Sucesso!!";
-        }
-        else
+        }else
         {
             sucesso = false;
-            mensagem = "Erro ao adicionar o livro. Tente novamente.";
+            var erro = await resposta.Content.ReadFromJsonAsync<ErroResponse>();
+            Console.WriteLine($"Erro lido: {erro?.Error}");
+            mensagem = erro?.Error ?? "Erro ao cadastrar livro";
+            Console.WriteLine($"Mensagem definida: {mensagem}");
+            
+
         }
+
+        Console.WriteLine($"Status da resposta: {resposta.StatusCode}");
+    }
+
+
+
+    public class ErroResponse
+    {
+        public string Error { get; set; } = string.Empty;    
     }
 
 

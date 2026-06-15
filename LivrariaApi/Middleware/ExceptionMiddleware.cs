@@ -33,12 +33,12 @@ namespace LivrariaApi.Middleware
             catch(ArgumentException ex){ 
 
                 //LogWarning registra uma mensagem de aviso, indicando o tipo de erro e sua respectiva mensagem
-               _logger.LogWarning("Erro de validação: {Message}", ex.Message);
+               _logger.LogWarning($"Erro de validação: {ex.Message}");
                 await EscreverResposta(context, HttpStatusCode.BadRequest, ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Erro de validação: {Message}", ex.Message);
+                _logger.LogWarning($"Erro inesperado: {ex.Message}");
                 await EscreverResposta(context, HttpStatusCode.InternalServerError, "Ocorreu um erro inesperado. Tente novamente mais tarde.");
             }
         }
