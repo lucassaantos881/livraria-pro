@@ -47,15 +47,15 @@ namespace LivrariaTests
 
             var pedido = new Pedido();
 
-            var fisico = new LivroFisico(4, "Livro Físico", 50, "Autor", "SIMPLES", 1);
-            var digital = new LivroDigital(3, "Livro Digital", 100, "Autor", "PDF", 1);
+            var pedidoFisico = new ItemPedido(1, 2, 5, 35);
+            var pedidoDigital = new ItemPedido(2, 4, 2, 28);
 
-            pedido.Livros.Add(fisico) ;
-            pedido.Livros.Add(digital);
+            pedido.ItemPedido.Add(pedidoFisico) ;
+            pedido.ItemPedido.Add(pedidoDigital);
 
             var resultadoPedido = pedido.CalcularTotal();
 
-            Assert.Equal(150, resultadoPedido);
+            Assert.Equal(231, resultadoPedido);
 
         }
     }

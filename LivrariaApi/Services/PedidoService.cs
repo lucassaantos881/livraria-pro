@@ -25,17 +25,54 @@ namespace LivrariaApi.Services
 
             var pedido = new Pedido(pedidoDto.IdPedido, pedidoDto.NomeCliente, pedidoDto.TelefoneCliente);
 
+            //extrai apenas os ID da lista de itens
+            var ids = pedidoDto.Itens.Select(l => l.LivroId).ToList();
+
             //Verifica se o livro existe no banco de dados
             var livros = _context.Livros //olha na tabela de livros
-                .Where(x => pedidoDto.LivroIds //filtra somente os livros desejados
-                .Contains(x.Id)) //cujo Id esteja presente na lista de Ids do pedido
+                .Where(x => ids.Contains(x.Id))//filtra passando os IDS dos itens, que contenha o Id do respectivo livro.
                 .ToList(); //executa a consulta e retorna os resultados como uma lista
 
-            pedido.Livros = livros; //atribui a lista de livros ao pedido
-
-            pedido.StatusPedido = Status.PAGAMENTO_PENDENTE;
             _context.Add(pedido);
             _context.SaveChanges();
+
+            foreach(var iPedido in pedidoDto.Itens)
+            {
+                var livro = livros.FirstOrDefault(x => x.Id == iPedido.LivroId);
+
+                if (livro == null)
+                {
+                    throw new ArgumentException($"ERRO: LIVRO COM ID {iPedido.LivroId} NÃO ENCONTRADO");
+                }
+
+                if (livro.Quantidade < iPedido.QuantidadeLivros)
+                {
+                    throw new ArgumentException("ERRO: QUANTIDADE INSUFICIENTE");
+                }
+                else
+                {
+
+                   livro.Quantidade -= iPedido.QuantidadeLivros;
+                    var novoItem = new ItemPedido(livro.Id, pedido.Id, iPedido.QuantidadeLivros, livro.CalculoPrecoUnitario());
+
+                    
+
+                    _context.Update(livro);
+                    _context.Add(novoItem);
+                    
+
+                }
+
+
+                
+            }
+
+
+            pedido.StatusPedido = Status.PROCESSANDO_PEDIDO;
+            _context.SaveChanges();
+
+
+
         }
 
         public Pedido? AnalisarPedido(int id)
@@ -46,7 +83,7 @@ namespace LivrariaApi.Services
             }
 
             var pedidoLocalizado = _context.Pedidos
-                                    .Include(p => p.Livros)
+                                    .Include(p => p.ItemPedido)
                                     .FirstOrDefault(p => p.Id == id);
 
             if (pedidoLocalizado == null)
@@ -65,7 +102,7 @@ namespace LivrariaApi.Services
             }
 
             var pedidoCancelado = _context.Pedidos
-                                   .Include(p => p.Livros) //carrega os livros relacionados
+                                   .Include(p => p.ItemPedido) //carrega os livros relacionados
                                    .FirstOrDefault(p => p.Id == id);
 
             if (pedidoCancelado == null)
@@ -73,10 +110,25 @@ namespace LivrariaApi.Services
                 throw new ArgumentException(nameof(id), "ERRO: PEDIDO NÃO ENCONTRADO");
             }
 
-            pedidoCancelado.Livros.Clear(); //remove relacionamento (pois o pedido contém os livros contidos na outra tabela)
-            _context.Remove(pedidoCancelado);
+            foreach (var item in pedidoCancelado.ItemPedido)
+            {
+                var livro = _context.Livros.FirstOrDefault(l => l.Id == item.LivroId);
+
+                if (livro == null)
+                {
+                    throw new ArgumentException($"ERRO: LIVRO COM ID {item.LivroId} NÃO ENCONTRADO");
+                }
+
+                livro.Quantidade += item.QuantidadeLivros;
+                _context.Update(livro);
+
+            }
+
+            // remove cada item antes do pedido
+            _context.ItemPedidos.RemoveRange(pedidoCancelado.ItemPedido);
+            _context.Pedidos.Remove(pedidoCancelado);
             _context.SaveChanges();
-            
+
         }
 
         public void DespacharPedido(int id)
@@ -93,7 +145,7 @@ namespace LivrariaApi.Services
             {
                 throw new ArgumentException(nameof(id), "ERRO: PEDIDO NÃO ENCONTRADO");
             }
-            pedidoDespachado.StatusPedido = Status.PROCESSANDO_PEDIDO;
+            pedidoDespachado.StatusPedido = Status.EM_TRANSITO;
             _context.Update(pedidoDespachado);
             _context.SaveChanges();
 
@@ -108,7 +160,7 @@ namespace LivrariaApi.Services
             }
             
             var pedido = _context.Pedidos
-                .Include(p => p.Livros) //Carrega os livros relacionados ao pedido
+                .Include(p => p.ItemPedido) //Carrega os livros relacionados ao pedido
                 .FirstOrDefault(p => p.Id == id); //Filtra pelo Id
             
 

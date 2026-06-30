@@ -18,7 +18,7 @@ namespace LivrariaCore.DTO_s
 
         [Required(ErrorMessage = "O telefone do cliente é obrigatório")]
         public string TelefoneCliente { get; set; } = string.Empty;
-        public List<int> LivroIds { get; set; } = new List<int>();
+        public List<ItemPedidoDTO> Itens { get; set; } = new List<ItemPedidoDTO>();
 
     }
 }

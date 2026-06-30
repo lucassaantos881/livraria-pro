@@ -22,6 +22,7 @@ namespace LivrariaApi.Data
         public DbSet<LivroDigital> LivrosDigitais { get; set; }
         
         public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<ItemPedido> ItemPedidos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +36,9 @@ namespace LivrariaApi.Data
             modelBuilder.Entity<Pedido>()
                 .Property(p => p.StatusPedido)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<ItemPedido>()
+                .HasKey(i => new { i.LivroId, i.PedidoId });
             
         }
 

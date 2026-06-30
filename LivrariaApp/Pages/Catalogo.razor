@@ -1,6 +1,7 @@
 ﻿@page "/catalogo"
 @using LivrariaCore.Models
 @inject HttpClient Http
+@inject IJSRuntime JS
 
 <h3>Catalogo de Livros</h3>
 
@@ -34,9 +35,14 @@ else
                     <td>@fisico.Nome</td>
                     <td>@fisico.Autor</td>
                     <td>@fisico.TipoCapa</td>
-                    <td>@fisico.Preco</td>
+                    <td>R$ @fisico.Preco</td>
                     <td>R$ @fisico.CalculoPrecoUnitario().ToString("N2")</td>
                     <td>@fisico.Quantidade</td>
+
+                    <td>
+                        <a href="editar-livros/Fisico/@fisico.Id">✏️</a>
+                        <button class="btn-link" @onclick="() => ConfirmarExclusao(fisico.Id)">🗑️</button>
+                    </td>
 
 
                 </tr>
@@ -66,9 +72,18 @@ else
                     <td>@digitais.Nome</td>
                     <td>@digitais.Autor</td>
                     <td>@digitais.Formato</td>
-                    <td>@digitais.Preco.ToString("N2")</td>
+                    <td>R$ @digitais.Preco.ToString("N2")</td>
                     <td>R$ @digitais.CalculoPrecoUnitario().ToString("N2")</td>
                     <td>@digitais.Quantidade</td>
+
+                    <td>
+                        <a href="editar-livros/Digital/@digitais.Id">✏️</a>
+                        <button class="btn-link" @onclick="() => ConfirmarExclusao(digitais.Id)">🗑️</button>
+                    </td>
+
+                    <td>
+                        <a href="editar-livros/Digital/@digitais.Id"></a>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -78,9 +93,9 @@ else
     <hr />
 
     <h3>Buscar Livro por ID</h3>
-    <input @bind = "idBusca" placeholder="ID do Livro" />
+    <input @bind="idBusca" placeholder="ID do Livro" />
 
-    <button @onclick= "BuscarLivro">Buscar</button>
+    <button @onclick="BuscarLivro">Buscar</button>
 
     @if (livroBuscado != null)
     {
@@ -93,6 +108,7 @@ else
             <p>Quantidade: @livroBuscado.Quantidade</p>
 
             <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
+
         }
         else if (livroBuscado is LivroDigital)
         {
@@ -106,6 +122,7 @@ else
         }
     }
 
+
 }
 
 
@@ -118,19 +135,14 @@ else
 
     private Livro? livroBuscado;
 
-    protected override async Task OnInitializedAsync()
+    private bool sucesso = false;
+    private string mensagem = string.Empty;
+
+
+    private async Task BuscarLivro()
     {
-        //Chama a API e armazena na Lista
-        livrosFisicos = await Http.GetFromJsonAsync<List<LivroFisico>>("https://localhost:7020/api/livro/consultafisicos");
-        livrosDigitais = await Http.GetFromJsonAsync<List<LivroDigital>>("https://localhost:7020/api/livro/consultadigitais");
-
-
-    }
-
-    private async Task BuscarLivro(){
-        if(idBusca <= 0)
+        if (idBusca <= 0)
         {
-            livroBuscado = null;
             return;
         }
         else
@@ -142,9 +154,92 @@ else
                 livroBuscado = livrosDigitais?.FirstOrDefault(d => d.Id == idBusca);
             }
 
-           
+
 
         }
+    }
+
+    private async Task ConfirmarExclusao(int id)
+    {
+        // Abre o "confirm" nativo do navegador. Retorna true se clicar em OK e false se Cancelar.
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja deletar este livro?");
+
+        if (confirmado)
+        {
+            // Se o usuário confirmou, aí sim chamamos o seu método original
+            await DeletarLivro(id);
+        }
+        // Se ele clicar em Cancelar, o código simplesmente para aqui e nada acontece!
+    }
+
+    private async Task DeletarLivro(int id)
+    {
+        HttpResponseMessage resposta;
+
+        if (id <= 0)
+        {
+            return;
+        }
+
+        var fis = livrosFisicos?.Any(f => f.Id == id) ?? false;
+        var dig = livrosDigitais?.Any(d => d.Id == id) ?? false;
+
+        resposta = await Http.DeleteAsync($"https://localhost:7020/api/livro/{id}");
+
+        if (resposta.IsSuccessStatusCode)
+        {
+            if (fis)
+            {
+                var livroNaTela = livrosFisicos?.FirstOrDefault(f => f.Id == id);
+
+                if (livroNaTela != null)
+                {
+                    
+                    livrosFisicos?.Remove(livroNaTela);
+
+                }
+
+
+                
+            }else if (dig)
+            {
+                var livroNaTela = livrosDigitais?.First(d => d.Id == id);
+
+                if(livroNaTela != null)
+                {
+                    livrosDigitais?.Remove(livroNaTela);
+
+                }
+
+                
+            }
+
+            sucesso = true;
+            mensagem = "Livro Deletado com Sucesso!!";
+        }
+        else
+        {
+            sucesso = false;
+            var erro = await resposta.Content.ReadFromJsonAsync<ErroResponse>();
+            mensagem = erro?.Error ?? "Erro ao deletar livro";
+        }
+
+
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Chama a API e armazena na Lista
+        livrosFisicos = await Http.GetFromJsonAsync<List<LivroFisico>>("https://localhost:7020/api/livro/consultafisicos");
+        livrosDigitais = await Http.GetFromJsonAsync<List<LivroDigital>>("https://localhost:7020/api/livro/consultadigitais");
+
+
+    }
+
+    public class ErroResponse
+    {
+        public string Error { get; set; } = string.Empty;
     }
 
 

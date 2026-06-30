@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LivrariaCore.DTO_s;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -40,12 +41,13 @@ namespace LivrariaCore.Models
         public string TelefoneCliente { get; set; } = string.Empty;
         public Status StatusPedido { get; set; }
 
-        public ICollection<Livro> Livros { get; set; } = new List <Livro>();
+        public ICollection<ItemPedido> ItemPedido { get; set; } = new List<ItemPedido>();
+
 
 
         public double CalcularTotal()
         {
-            return Livros.Sum(l => l.CalculoPrecoUnitario());
+            return ItemPedido.Sum(i => i.PrecoUnitario * i.QuantidadeLivros);
         }
 
     }

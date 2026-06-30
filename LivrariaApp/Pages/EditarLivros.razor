@@ -1,0 +1,175 @@
+﻿@page "/editar-livros/{Tipo}/{Id:int}"
+@using LivrariaCore.DTO_s
+
+@inject HttpClient Http
+
+<h3>Editar livros</h3>
+
+
+@if (fisico == null && digital == null)
+{
+    <p>Carregando...</p>
+}
+else
+{
+    
+    <hr/>
+
+    if(Tipo == "Fisico"){
+             <h4>Digite as novas informações do Livro: @fisico?.ID</h4>
+
+                <EditForm Model="fisico" OnValidSubmit="EditarLivro">
+                    <DataAnnotationsValidator />
+            
+                    <InputNumber @bind-Value="fisico.ID" hidden />
+
+                    <span>Digite o nome:</span>
+                    <InputText placeholder="Ex: Harry Potter..." @bind-Value="fisico.Nome" />
+                    <hr />
+
+                    <span>Digite o autor:</span>
+                    <InputText placeholder="Ex: J.k Rowling" @bind-Value="fisico.Autor" />
+                    <hr />
+
+                    <span>Digite o preço:</span>
+                    <InputNumber @bind-Value="fisico.Preco" placeholder="Ex: 24.55" step="0.01" />
+                    <hr />
+
+                    <span>Digite o tipo da capa:</span>
+                    <InputText placeholder="Ex: DURA" @bind-Value="fisico.TipoCapa" />
+                    <hr />
+
+                    <span>Digite a quantidade:</span>
+                    <InputNumber placeholder="Ex: 3" @bind-Value="fisico.Quantidade" />
+                    <hr />
+
+                    <button type="submit">Editar livro</button>
+
+                    <ValidationSummary />
+                </EditForm>
+       
+    }else if(Tipo == "Digital"){
+
+        <h4>Digite as novas informações do Livro: @digital?.ID</h4>
+            <EditForm Model="digital" OnValidSubmit="EditarLivro">
+                <DataAnnotationsValidator />
+
+                <InputNumber @bind-Value="digital.ID" hidden />
+
+                <span>Digite o nome:</span>
+                <InputText placeholder="Ex: Harry Potter..." @bind-Value="digital.Nome" />
+                <hr />
+
+                <span>Digite o autor:</span>
+                <InputText placeholder="Ex: J.k Rowling" @bind-Value="digital.Autor" />
+                <hr />
+
+                <span>Digite o preço:</span>
+                <InputNumber @bind-Value="digital.Preco" placeholder="Ex: 24.55" step="0.01" />
+                <hr />
+
+                <span>Digite o formato:</span>
+                <InputText placeholder="Ex: PDF" @bind-Value="digital.Formato" />
+                <hr />
+
+                <span>Digite a quantidade:</span>
+                <InputNumber placeholder="Ex: 3" @bind-Value="digital.Quantidade" />
+                <hr />
+
+                <button type="submit">Editar livro</button>
+
+                <ValidationSummary />
+            </EditForm>
+    }
+}
+    
+        
+        @if (!string.IsNullOrWhiteSpace(mensagem))
+        {
+            @if (sucesso)
+            {
+                <div class="alert alert-success">@mensagem</div>
+            }
+            else
+            {
+                <div class="alert alert-danger">@mensagem</div>
+            }
+        }
+    
+
+
+@code {
+
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public string Tipo { get; set; } = string.Empty;
+
+    private LivroFisicoDTO? fisico;
+    private LivroDigitalDTO? digital;
+
+    
+
+    private bool sucesso = false;
+    private string mensagem = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Tipo == "Fisico")
+        {
+
+            fisico = await Http.GetFromJsonAsync<LivroFisicoDTO>
+                ($"https://localhost:7020/api/livro/{Id}");
+        }else if (Tipo == "Digital")
+        {
+            digital = await Http.GetFromJsonAsync<LivroDigitalDTO>
+               ($"https://localhost:7020/api/livro/{Id}");
+        }
+
+
+    }
+     
+   
+
+    private async Task EditarLivro()
+    {
+
+        HttpResponseMessage resposta;
+
+        if(Tipo == "Fisico"){
+
+            resposta = await Http.PutAsJsonAsync($"https://localhost:7020/api/livro/fisicos/{fisico?.ID}", fisico);
+        }else{
+        
+            resposta = await Http.PutAsJsonAsync($"https://localhost:7020/api/livro/digitais/{digital?.ID}", digital);
+        }
+        
+
+
+        if (resposta.IsSuccessStatusCode)
+        {
+            sucesso = true;
+            mensagem = "Livro Editado com Sucesso!!";
+        }
+        else
+        {
+            sucesso = false;
+            var erro = await resposta.Content.ReadFromJsonAsync<ErroResponse>();
+            mensagem = erro?.Error ?? "Erro ao editar livro";
+        }
+
+
+
+    }
+
+
+
+    public class ErroResponse
+    {
+        public string Error { get; set; } = string.Empty;
+    }
+
+}
