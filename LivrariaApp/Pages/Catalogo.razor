@@ -95,7 +95,7 @@ else
     <h3>Buscar Livro por ID</h3>
     <input @bind="idBusca" placeholder="ID do Livro" />
 
-    <button @onclick="BuscarLivro">Buscar</button>
+    <button class="btn btn-primary" @onclick="BuscarLivro">Buscar</button>
 
     @if (livroBuscado != null)
     {
@@ -168,6 +168,7 @@ else
         {
             // Se o usuário confirmou, aí sim chamamos o seu método original
             await DeletarLivro(id);
+         
         }
         // Se ele clicar em Cancelar, o código simplesmente para aqui e nada acontece!
     }

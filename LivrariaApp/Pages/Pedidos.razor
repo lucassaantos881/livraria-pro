@@ -1,0 +1,246 @@
+﻿@page "/pedidos"
+@using LivrariaCore.DTO_s
+@using LivrariaCore.Models
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+@using System.Text.Json
+@using System.Text.Json.Serialization
+
+<h3>Pedidos</h3>
+
+<a href="/cadastrar-pedido" class="btn btn-primary">
+    + Novo Pedido
+</a>
+
+<hr/>
+
+@if (pedidos == null)
+{
+    <p>Carregando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data Pedido</th>
+                <th>Nome</th>
+                <th>Status Pedido</th>
+                <th>Telefone</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+            @foreach (var pedido in pedidos!)
+            {
+                <tr>
+                    <td>@pedido.Id</td>
+                    <td>@pedido.DataPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@pedido.NomeCliente</td>
+                    <td>@pedido.StatusPedido</td>
+                    <td>@pedido.TelefoneCliente</td>
+
+                    <button class="btn-link" @onclick="() => ConfirmarExclusao(pedido.Id)">🗑️</button>
+               
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <hr />
+
+    <h3>Buscar Pedido por ID</h3>
+    <input @bind="idBusca" placeholder="ID do Pedido" />
+
+    <button class="btn btn-primary" @onclick="AnalisarPedido">Buscar</button>
+
+    <hr />
+
+    @if (pedidoLocalizado != null)
+    {
+        <h4>Pedido Encontrado</h4>
+        <p>ID: @pedidoLocalizado.Id</p>
+        <p>Data do Pedido: @pedidoLocalizado.DataPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+        <p>Nome do Cliente: @pedidoLocalizado.NomeCliente</p>
+        <p>Status do Pedido: @pedidoLocalizado.StatusPedido</p>
+        <p>Telefone do Cliente: @pedidoLocalizado.TelefoneCliente</p>
+
+        if (pedidoLocalizado.ItemPedido.Count > 0)
+        {
+            <p>Items do Pedido: @pedidoLocalizado.ItemPedido.Count</p>
+
+            @foreach (var item in pedidoLocalizado.ItemPedido)
+            {
+                <ul>
+                    <li>ID DO LIVRO: @item.LivroId -- PREÇO UNITÁRIO: R$@item.PrecoUnitario.ToString("N2") -- QUANTIDADE LIVROS: @item.QuantidadeLivros</li>
+                </ul>
+            }
+
+            <p>Calcular Total: R$@pedidoLocalizado.CalcularTotal().ToString("N2")</p>
+
+            <button class="btn btn-primary" @onclick="() => ConfirmarDespacho(pedidoLocalizado.Id)">Despachar Pedido</button>
+
+             @if (!string.IsNullOrWhiteSpace(mensagem))
+        {
+            @if (sucesso)
+            {
+                <div class="alert alert-success">@mensagem</div>
+            }
+            else
+            {
+                <div class="alert alert-danger">@mensagem</div>
+            }
+            }
+        }
+        
+
+
+        
+
+        
+
+    }
+    
+}
+
+@code {
+    private List<Pedido>? pedidos;
+    private Pedido? pedidoLocalizado;
+
+    private bool sucesso = false;
+    private string mensagem = string.Empty;
+    private int idBusca;
+
+    private async Task AnalisarPedido()
+    {
+        if (idBusca <= 0)
+        {
+            return;
+        }
+
+        pedidoLocalizado = pedidos?.FirstOrDefault(p => p.Id == idBusca);
+
+
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // ✅ dentro do método — var funciona aqui
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
+
+        pedidos = await Http.GetFromJsonAsync<List<Pedido>>(
+            "https://localhost:7020/api/pedido",
+            options);
+    }
+
+    private async Task ConfirmarExclusao(int id)
+    {
+        // Abre o "confirm" nativo do navegador. Retorna true se clicar em OK e false se Cancelar.
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja deletar este livro?");
+
+        if (confirmado)
+        {
+            // Se o usuário confirmou, aí sim chamamos o seu método original
+            await DeletarPedido(id);
+        }
+        // Se ele clicar em Cancelar, o código simplesmente para aqui e nada acontece!
+    }
+
+    private async Task ConfirmarDespacho(int id)
+    {
+        //Abre a tela de confirmação em JS para confirmar se deseja realizar a ação
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", "Tem certeza que deseja despachar este pedido?");
+
+        if (confirmado)
+        {
+            //Se o usuário confirmou, é chamado o método original
+            await DespacharPedido(id);
+        }
+        // Se ele clicar em Cancelar, o código simplesmente para aqui e nada acontece!
+    }
+
+
+
+    private async Task DeletarPedido(int id)
+    {
+        HttpResponseMessage resposta;
+
+        resposta = await Http.DeleteAsync($"https://localhost:7020/api/pedido/{id}");
+
+        if(resposta.IsSuccessStatusCode){
+            sucesso = true;
+            mensagem = "Pedido Deletado com Sucesso!!";
+
+            var pedidoRemovido = pedidos?.FirstOrDefault(p => p.Id == id);
+
+            if (pedidoRemovido != null)
+            {
+                pedidos?.Remove(pedidoRemovido);
+            }
+        }
+        else
+        {
+            sucesso = false;
+            var erro = await resposta.Content.ReadFromJsonAsync<ErroResponse>();
+            mensagem = erro?.Error ?? "Erro ao deletar pedido!!";
+        }
+
+
+
+    }
+
+    private async Task DespacharPedido(int id)
+    {
+
+        HttpResponseMessage resposta;
+
+        if (id <= 0)
+        {
+            return;
+        }
+
+        var pedidoParaDespachar = pedidos?.FirstOrDefault(p => p.Id == id);
+
+        if(pedidoParaDespachar == null)
+        {
+            sucesso = false;
+            mensagem = "Pedido não encontrado para despachar.";
+            return;
+        }
+        else
+        {
+            pedidoParaDespachar.StatusPedido = Status.EM_TRANSITO;
+
+            resposta = await Http.PutAsJsonAsync($"https://localhost:7020/api/pedido/despachar/{id}", pedidoParaDespachar);
+
+            if (resposta.IsSuccessStatusCode)
+            {
+                sucesso = true;
+                mensagem = "Pedido despachado com sucesso!";
+            }
+            else
+            {
+                sucesso = false;
+                mensagem = "Erro ao despachar pedido."; 
+            }
+        }
+
+    }
+
+
+    public class ErroResponse
+    {
+        public string Error { get; set; } = string.Empty;
+    }
+}
+

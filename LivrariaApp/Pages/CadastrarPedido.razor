@@ -1,0 +1,256 @@
+﻿@page "/cadastrar-pedido"
+
+@using LivrariaCore.DTO_s
+@using LivrariaCore.Models
+
+@inject HttpClient Http
+
+<h3>Cadastrar Pedido</h3>
+
+<hr/>
+
+<EditForm Model="novoPedido" OnValidSubmit="CriarPedido">
+            <DataAnnotationsValidator />
+           
+            <span>Digite o ID do pedido: </span>
+            <InputNumber placeholder="Ex: 999" @bind-Value="novoPedido.IdPedido" />
+            <hr />
+
+            <span>Digite o seu nome: </span>
+            <InputText placeholder="Ex: Lucas Silva" @bind-Value="novoPedido.NomeCliente" />
+            <hr />
+
+            <span>Digite o seu telefone: </span>
+            <InputText placeholder="Ex: 16 99999-9999" @bind-Value="novoPedido.TelefoneCliente" />
+            <hr />
+
+           <ValidationSummary />
+ </EditForm>
+
+<button type="button" class="btn btn-primary" @onclick="() => confirmarAcao = true">
+    + Adicionar Itens
+</button>
+
+<hr />
+<br />
+
+@if (confirmarAcao)
+{
+
+    <h5>LIVROS FÍSICOS</h5>
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Tipo Capa</th>
+                <th>Qtd Disponível</th>
+                <th>Qtd Desejada</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @foreach (var fisicos in livrosFisicos!)
+            {
+                <tr>
+                    <td>@fisicos.Id</td>
+                    <td>@fisicos.Nome</td>
+                    <td>@fisicos.Preco</td>
+                    <td>@fisicos.TipoCapa</td>
+                    <td>@fisicos.Quantidade</td>
+                    <td>
+                        <input type="number"
+                               min="0"
+                               value="@quantidades[fisicos.Id]"
+                               @onchange="e => quantidades[fisicos.Id] = Convert.ToInt32(e.Value)" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary" @onclick="() => AdicionarItem(fisicos)"> + Adicionar </button>
+                    </td>
+
+                                
+                                
+                </tr>
+
+            }
+        </tbody>
+
+    </table>
+
+    <hr/>
+
+    <h5>LIVROS DIGITAIS</h5>
+
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Formato</th>
+                <th>Qtd Disponível</th>
+                <th>Qtd Desejada</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @foreach (var digitais in livrosDigitais!)
+            {
+                <tr>
+                    <td>@digitais.Id</td>
+                    <td>@digitais.Nome</td>
+                    <td>@digitais.Preco</td>
+                    <td>@digitais.Formato</td>
+                    <td>@digitais.Quantidade</td>
+                    <td>
+                        <input type="number"
+                               min="0"
+                               value="@quantidades[digitais.Id]"
+                               @onchange="e => quantidades[digitais.Id] = Convert.ToInt32(e.Value)" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary" @onclick="() => AdicionarItem(digitais)"> + Adicionar </button>
+                    </td>
+
+                                
+                                
+                </tr>
+
+            }
+        </tbody>
+
+
+
+
+    </table>
+
+    <hr />
+
+                
+    
+
+}
+
+<button type="button" class="btn btn-primary" @onclick="CriarPedido">
+    Criar Pedido
+</button>
+
+@if (!string.IsNullOrWhiteSpace(mensagem))
+{
+    @if (sucesso)
+    {
+        <div class="alert alert-success">@mensagem</div>
+    }
+    else
+    {
+        <div class="alert alert-danger">@mensagem</div>
+    }
+}
+
+
+
+
+
+@code {
+
+    private List<LivroFisico>? livrosFisicos;
+    private List<LivroDigital>? livrosDigitais;
+
+    private Dictionary<int, int>? quantidades = new();
+
+    private bool confirmarAcao = false;
+    private bool sucesso = false;
+    private string mensagem = string.Empty;
+
+
+    private PedidoDTO? novoPedido = new PedidoDTO();
+
+    private async Task CriarPedido()
+    {
+
+        if (string.IsNullOrWhiteSpace(novoPedido.NomeCliente) ||
+        novoPedido.IdPedido <= 0)
+        {
+            mensagem = "Preencha todos os campos obrigatórios";
+            sucesso = false;
+            return;
+        }
+
+        HttpResponseMessage resposta = await Http.PostAsJsonAsync("https://localhost:7020/api/pedido", novoPedido);
+
+        if (resposta.IsSuccessStatusCode)
+        {
+            sucesso = true;
+            mensagem = "Pedido Adicionado com Sucesso!!";
+
+
+        }
+        else
+        {
+            sucesso = false;
+            var erro = await resposta.Content.ReadFromJsonAsync<ErrorResponse>();
+            Console.WriteLine($"Erro lido: {erro?.Error}");
+            mensagem = erro?.Error ?? "Erro ao cadastrar o pedido";
+            Console.WriteLine($"Mensagem definida: {mensagem}");
+
+
+        }
+
+        Console.WriteLine($"Status da resposta: {resposta.StatusCode}");
+
+    }
+
+    private void AdicionarItem(Livro livro)
+    {
+        var quantidade = quantidades.GetValueOrDefault(livro.Id, 0);
+
+        if (quantidade <= 0) return;
+
+        var itemExistente = novoPedido.Itens.FirstOrDefault(p => p.LivroId == livro.Id);
+        if (itemExistente != null)
+        {
+            itemExistente.QuantidadeLivros += quantidade;
+        }
+        else
+        {
+            // Adicionar novo item ao pedido
+            novoPedido.Itens.Add(new ItemPedidoDTO
+                {
+                    LivroId = livro.Id,
+                    QuantidadeLivros = quantidade,
+                });
+        }
+
+
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Chama a API e armazena na Lista
+        livrosFisicos = await Http.GetFromJsonAsync<List<LivroFisico>>("https://localhost:7020/api/livro/consultafisicos");
+        livrosDigitais = await Http.GetFromJsonAsync<List<LivroDigital>>("https://localhost:7020/api/livro/consultadigitais");
+
+        // inicializa o Dictionary para cada livro
+        foreach (var livro in livrosFisicos!)
+            quantidades?[livro.Id] = 0;
+
+        foreach (var livro in livrosDigitais!)
+            quantidades?[livro.Id] = 0;
+
+    }
+
+
+
+    public class ErrorResponse
+    {
+        public string Error { get; set; } = string.Empty;
+    }
+}

@@ -73,7 +73,11 @@ namespace LivrariaApi.Controllers
 
         }
 
-
+        [HttpGet]
+        public ActionResult<IEnumerable<Pedido>> GetPedidos()
+        {
+            return _pedidoService.ListarPedidos().ToList();
+        }
 
         [HttpDelete("{id}")]
         public ActionResult<Pedido> Delete(int id)

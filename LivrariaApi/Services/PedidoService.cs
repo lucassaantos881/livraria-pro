@@ -18,7 +18,7 @@ namespace LivrariaApi.Services
 
         public void AdicionarPedido(PedidoDTO pedidoDto)
         {
-            if(pedidoDto == null)
+            if (pedidoDto == null)
             {
                 throw new ArgumentException(nameof(pedidoDto), "ERRO: PEDIDO NÃO PODE SER NULO");
             }
@@ -36,7 +36,7 @@ namespace LivrariaApi.Services
             _context.Add(pedido);
             _context.SaveChanges();
 
-            foreach(var iPedido in pedidoDto.Itens)
+            foreach (var iPedido in pedidoDto.Itens)
             {
                 var livro = livros.FirstOrDefault(x => x.Id == iPedido.LivroId);
 
@@ -52,19 +52,19 @@ namespace LivrariaApi.Services
                 else
                 {
 
-                   livro.Quantidade -= iPedido.QuantidadeLivros;
+                    livro.Quantidade -= iPedido.QuantidadeLivros;
                     var novoItem = new ItemPedido(livro.Id, pedido.Id, iPedido.QuantidadeLivros, livro.CalculoPrecoUnitario());
 
-                    
+
 
                     _context.Update(livro);
                     _context.Add(novoItem);
-                    
+
 
                 }
 
 
-                
+
             }
 
 
@@ -158,11 +158,11 @@ namespace LivrariaApi.Services
             {
                 throw new ArgumentException(nameof(id), "ERRO: ID DO PEDIDO A SER CALCULADO DEVE SER UM NÚMERO POSITIVO");
             }
-            
+
             var pedido = _context.Pedidos
                 .Include(p => p.ItemPedido) //Carrega os livros relacionados ao pedido
                 .FirstOrDefault(p => p.Id == id); //Filtra pelo Id
-            
+
 
             if (pedido == null)
             {
@@ -171,6 +171,12 @@ namespace LivrariaApi.Services
             }
 
             return pedido?.CalcularTotal() ?? 0;
+        }
+
+        public IEnumerable<Pedido> ListarPedidos()
+        {
+            return _context.Pedidos.Include(p => p.ItemPedido).ToList();
+
         }
         
 

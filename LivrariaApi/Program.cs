@@ -28,11 +28,13 @@ builder.Host.UseSerilog(); // Configura o Serilog como o logger para a aplica√ß√
 builder.Services.AddScoped<ILivroService, LivroService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 
+
 builder.Services.AddControllers()
 .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters
     .Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
 });
 
 builder.Services.AddCors(options =>

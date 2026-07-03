@@ -11,5 +11,6 @@ namespace LivrariaApi.Services
         void CancelarPedido(int id);
         Pedido? AnalisarPedido(int id);
         double CalcularPedido(int id);
+        IEnumerable<Pedido> ListarPedidos();
     }
 }
