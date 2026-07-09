@@ -3,126 +3,139 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 
-<h3>Catalogo de Livros</h3>
+<h3 class="mb-4">Catálogo de Livros</h3>
 
 @if (livrosFisicos == null)
 {
-   <p>Carregando...</p>    
-
+    <p>Carregando...</p>
 }
 else
 {
-    <h3>Livros Fisicos</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Titulo</th>
-                <th>Autor</th>
-                <th>Formato Capa</th>
-                <th>Preço</th>
-                <th>Preço com Frete</th>
-                <th>Quantidade</th>
-            </tr>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <strong>Livros Físicos</strong>
+            <span class="badge bg-light text-dark ms-2">@livrosFisicos.Count</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Formato Capa</th>
+                        <th>Preço</th>
+                        <th>Preço com Frete</th>
+                        <th>Quantidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var fisico in livrosFisicos!)
+                    {
+                        <tr>
+                            <td>@fisico.Id</td>
+                            <td>@fisico.Nome</td>
+                            <td>@fisico.Autor</td>
+                            <td>@fisico.TipoCapa</td>
+                            <td>R$ @fisico.Preco.ToString("N2")</td>
+                            <td>R$ @fisico.CalculoPrecoUnitario().ToString("N2")</td>
+                            <td>@fisico.Quantidade</td>
+                            <td>
+                                <a href="editar-livros/Fisico/@fisico.Id" class="btn btn-sm btn-outline-primary">
+                                    Editar
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarExclusao(fisico.Id)">
+                                    Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        </thead>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <strong>Livros Digitais</strong>
+            <span class="badge bg-light text-dark ms-2">@livrosDigitais!.Count</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Autor</th>
+                        <th>Formato</th>
+                        <th>Preço</th>
+                        <th>Preço com Desconto</th>
+                        <th>Quantidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var digital in livrosDigitais!)
+                    {
+                        <tr>
+                            <td>@digital.Id</td>
+                            <td>@digital.Nome</td>
+                            <td>@digital.Autor</td>
+                            <td>@digital.Formato</td>
+                            <td>R$ @digital.Preco.ToString("N2")</td>
+                            <td>R$ @digital.CalculoPrecoUnitario().ToString("N2")</td>
+                            <td>@digital.Quantidade</td>
+                            <td>
+                                <a href="editar-livros/Digital/@digital.Id" class="btn btn-sm btn-outline-primary">
+                                    Editar
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarExclusao(digital.Id)">
+                                    Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        <tbody>
-            @foreach(var fisico in livrosFisicos!)
-            {
-                <tr>
-                    <td>@fisico.Id</td>
-                    <td>@fisico.Nome</td>
-                    <td>@fisico.Autor</td>
-                    <td>@fisico.TipoCapa</td>
-                    <td>R$ @fisico.Preco</td>
-                    <td>R$ @fisico.CalculoPrecoUnitario().ToString("N2")</td>
-                    <td>@fisico.Quantidade</td>
+    <hr class="my-4" />
 
-                    <td>
-                        <a href="editar-livros/Fisico/@fisico.Id">✏️</a>
-                        <button class="btn-link" @onclick="() => ConfirmarExclusao(fisico.Id)">🗑️</button>
-                    </td>
+    <h4 class="mb-3">Buscar Livro por ID</h4>
 
+    <div class="d-flex gap-2 mb-4" style="max-width: 400px;">
+        <input class="form-control" @bind="idBusca" placeholder="ID do Livro" />
+        <button class="btn btn-primary" @onclick="BuscarLivro">Buscar</button>
+    </div>
 
-                </tr>
-            }
-
-        </tbody>
-    </table>
-
-    <h3>Livros Digitais</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Autor</th>
-                <th>Formato</th>
-                <th>Preço</th>
-                <th>Preço com Desconto</th>
-                <th>Quantidade</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var digitais in livrosDigitais!)
-            {
-                <tr>
-                    <td>@digitais.Id</td>
-                    <td>@digitais.Nome</td>
-                    <td>@digitais.Autor</td>
-                    <td>@digitais.Formato</td>
-                    <td>R$ @digitais.Preco.ToString("N2")</td>
-                    <td>R$ @digitais.CalculoPrecoUnitario().ToString("N2")</td>
-                    <td>@digitais.Quantidade</td>
-
-                    <td>
-                        <a href="editar-livros/Digital/@digitais.Id">✏️</a>
-                        <button class="btn-link" @onclick="() => ConfirmarExclusao(digitais.Id)">🗑️</button>
-                    </td>
-
-                    <td>
-                        <a href="editar-livros/Digital/@digitais.Id"></a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    
-    </table>
-
-    <hr />
-
-    <h3>Buscar Livro por ID</h3>
-    <input @bind="idBusca" placeholder="ID do Livro" />
-
-    <button class="btn btn-primary" @onclick="BuscarLivro">Buscar</button>
+    @if (!string.IsNullOrWhiteSpace(mensagem))
+    {
+        <div class="alert @(sucesso ? "alert-success" : "alert-danger")">@mensagem</div>
+    }
 
     @if (livroBuscado != null)
     {
-        @if (livroBuscado is LivroFisico)
-        {
-            <p>Livro fisico encontrado:</p>
-            <p>Nome: @livroBuscado.Nome</p>
-            <p>Autor: @livroBuscado.Autor</p>
-            <p>Preço: R$@livroBuscado.Preco.ToString("N2")</p>
-            <p>Quantidade: @livroBuscado.Quantidade</p>
+        <div class="card shadow-sm" style="max-width: 500px;">
+            <div class="card-header">
+                <strong>Livro Encontrado</strong>
+                <span class="badge @(livroBuscado is LivroFisico ? "bg-primary" : "bg-success") ms-2">
+                    @(livroBuscado is LivroFisico ? "Físico" : "Digital")
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Nome:</strong> @livroBuscado.Nome</p>
+                <p class="mb-1"><strong>Autor:</strong> @livroBuscado.Autor</p>
+                <p class="mb-1"><strong>Preço:</strong> R$ @livroBuscado.Preco.ToString("N2")</p>
+                <p class="mb-3"><strong>Quantidade:</strong> @livroBuscado.Quantidade</p>
 
-            <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
-
-        }
-        else if (livroBuscado is LivroDigital)
-        {
-            <p>Livro digital encontrado:</p>
-            <p>Nome: @livroBuscado.Nome</p>
-            <p>Autor: @livroBuscado.Autor</p>
-            <p>Preço: R$ @livroBuscado.Preco.ToString("N2")</p>
-            <p>Quantidade: @livroBuscado.Quantidade</p>
-
-            <p>PREÇO TOTAL: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</p>
-        }
+                <p class="fs-5 mb-0">
+                    <strong>Preço Total: R$ @livroBuscado.CalculoPrecoUnitario().ToString("N2")</strong>
+                </p>
+            </div>
+        </div>
     }
-
-
 }
 
 

@@ -3,8 +3,7 @@
 
 @inject HttpClient Http
 
-<h3>Editar livros</h3>
-
+<h3 class="mb-4">Editar Livro</h3>
 
 @if (fisico == null && digital == null)
 {
@@ -12,90 +11,106 @@
 }
 else
 {
-    
-    <hr/>
+    @if (!string.IsNullOrWhiteSpace(mensagem))
+    {
+        <div class="alert @(sucesso ? "alert-success" : "alert-danger")">@mensagem</div>
+    }
 
-    if(Tipo == "Fisico"){
-             <h4>Digite as novas informações do Livro: @fisico?.ID</h4>
-
+    @if (Tipo == "Fisico")
+    {
+        <div class="card shadow-sm" style="max-width: 600px;">
+            <div class="card-header bg-primary text-white">
+                <strong>Livro Físico #@fisico?.ID</strong>
+            </div>
+            <div class="card-body">
                 <EditForm Model="fisico" OnValidSubmit="EditarLivro">
                     <DataAnnotationsValidator />
-            
+
                     <InputNumber @bind-Value="fisico.ID" hidden />
 
-                    <span>Digite o nome:</span>
-                    <InputText placeholder="Ex: Harry Potter..." @bind-Value="fisico.Nome" />
-                    <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <InputText class="form-control" placeholder="Ex: Harry Potter" @bind-Value="fisico.Nome" />
+                    </div>
 
-                    <span>Digite o autor:</span>
-                    <InputText placeholder="Ex: J.k Rowling" @bind-Value="fisico.Autor" />
-                    <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Autor</label>
+                        <InputText class="form-control" placeholder="Ex: J.K. Rowling" @bind-Value="fisico.Autor" />
+                    </div>
 
-                    <span>Digite o preço:</span>
-                    <InputNumber @bind-Value="fisico.Preco" placeholder="Ex: 24.55" step="0.01" />
-                    <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Preço</label>
+                        <InputNumber class="form-control" @bind-Value="fisico.Preco" step="0.01" />
+                    </div>
 
-                    <span>Digite o tipo da capa:</span>
-                    <InputText placeholder="Ex: DURA" @bind-Value="fisico.TipoCapa" />
-                    <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Tipo da capa</label>
+                        <InputText class="form-control" placeholder="Ex: DURA" @bind-Value="fisico.TipoCapa" />
+                    </div>
 
-                    <span>Digite a quantidade:</span>
-                    <InputNumber placeholder="Ex: 3" @bind-Value="fisico.Quantidade" />
-                    <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade</label>
+                        <InputNumber class="form-control" @bind-Value="fisico.Quantidade" />
+                    </div>
 
-                    <button class="btn btn-primary" type="submit">Editar livro</button>
+                    <ValidationSummary class="text-danger" />
 
-                    <ValidationSummary />
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-primary" type="submit">Salvar alterações</button>
+                        <a href="/catalogo" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
                 </EditForm>
-       
-    }else if(Tipo == "Digital"){
+            </div>
+        </div>
+    }
+    else if (Tipo == "Digital")
+    {
+        <div class="card shadow-sm" style="max-width: 600px;">
+            <div class="card-header bg-success text-white">
+                <strong>Livro Digital #@digital?.ID</strong>
+            </div>
+            <div class="card-body">
+                <EditForm Model="digital" OnValidSubmit="EditarLivro">
+                    <DataAnnotationsValidator />
 
-        <h4>Digite as novas informações do Livro: @digital?.ID</h4>
-            <EditForm Model="digital" OnValidSubmit="EditarLivro">
-                <DataAnnotationsValidator />
+                    <InputNumber @bind-Value="digital.ID" hidden />
 
-                <InputNumber @bind-Value="digital.ID" hidden />
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <InputText class="form-control" placeholder="Ex: Harry Potter" @bind-Value="digital.Nome" />
+                    </div>
 
-                <span>Digite o nome:</span>
-                <InputText placeholder="Ex: Harry Potter..." @bind-Value="digital.Nome" />
-                <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Autor</label>
+                        <InputText class="form-control" placeholder="Ex: J.K. Rowling" @bind-Value="digital.Autor" />
+                    </div>
 
-                <span>Digite o autor:</span>
-                <InputText placeholder="Ex: J.k Rowling" @bind-Value="digital.Autor" />
-                <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Preço</label>
+                        <InputNumber class="form-control" @bind-Value="digital.Preco" step="0.01" />
+                    </div>
 
-                <span>Digite o preço:</span>
-                <InputNumber @bind-Value="digital.Preco" placeholder="Ex: 24.55" step="0.01" />
-                <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Formato</label>
+                        <InputText class="form-control" placeholder="Ex: PDF" @bind-Value="digital.Formato" />
+                    </div>
 
-                <span>Digite o formato:</span>
-                <InputText placeholder="Ex: PDF" @bind-Value="digital.Formato" />
-                <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Quantidade</label>
+                        <InputNumber class="form-control" @bind-Value="digital.Quantidade" />
+                    </div>
 
-                <span>Digite a quantidade:</span>
-                <InputNumber placeholder="Ex: 3" @bind-Value="digital.Quantidade" />
-                <hr />
+                    <ValidationSummary class="text-danger" />
 
-                <button class="btn btn-primary" type="submit">Editar livro</button>
-
-                <ValidationSummary />
-            </EditForm>
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-primary" type="submit">Salvar alterações</button>
+                        <a href="/catalogo" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
     }
 }
-    
-        
-        @if (!string.IsNullOrWhiteSpace(mensagem))
-        {
-            @if (sucesso)
-            {
-                <div class="alert alert-success">@mensagem</div>
-            }
-            else
-            {
-                <div class="alert alert-danger">@mensagem</div>
-            }
-        }
-    
 
 
 @code {

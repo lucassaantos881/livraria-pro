@@ -4,44 +4,86 @@
 
 <h3>Adicionar Livros</h3>
 
-      <select @bind="tipoLivro">
-            <option value="">Selecione o tipo</option>
-            <option value="Fisico">Fisico</option>
-            <option value="Digital">Digital</option>
-      </select>
+        <div class="mb-4" style="max-width: 300px;">
+            <label class="form-label">Tipo do livro</label>
+            <select class="form-select" @bind="tipoLivro">
+                <option value="">Selecione o tipo</option>
+                <option value="Fisico">Físico</option>
+                <option value="Digital">Digital</option>
+            </select>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(mensagem))
+        {
+            if (sucesso)
+            {
+                <div class="alert alert-success">@mensagem</div>
+            }
+            else
+            {
+                <div class="alert alert-danger">@mensagem</div>
+            }
+
+
+
+        }
 
 
       @if(tipoLivro == "Fisico"){
           
         <EditForm Model="tipoLivroFisico" OnValidSubmit="CadastroLivro">
             <DataAnnotationsValidator />
-        
-            <span>Digite o ID do livro: </span>
-            <input type="number" placeholder="Ex: 9" @bind="tipoLivroFisico.ID" />
-            <hr />
+            
+            <div class="card shadow-sm" style="max-width: 600px;">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">ID do livro</label>
+                        <input type="number" class="form-control" placeholder="Ex: 9" @bind="tipoLivroFisico.ID" />
 
-            <span>Digite o nome do livro: </span>
-            <input type="text" placeholder="Ex: Dom Casmurro" @bind="tipoLivroFisico.Nome" />
-            <hr />
+                    </div>
 
-            <span>Digite o autor do livro: </span>
-            <input type="text" placeholder="Ex: Machado de Assis..." @bind="tipoLivroFisico.Autor" />
-            <hr />
 
-            <span>Digite o preço do livro: </span>
-            <input type="number" step="0.01" placeholder="Ex: 45" @bind="tipoLivroFisico.Preco" />
-            <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Nome do livro</label>
+                        <input type="text" class="form-control" placeholder="Ex: Dom Casmurro" @bind="tipoLivroFisico.Nome" />
 
-            <span>Digite o tipo de capa do livro: </span>
-            <input type="text" placeholder="Ex: SIMPLES" @bind="tipoLivroFisico.TipoCapa" />
-            <hr />
+                    </div>
 
-            <span>Digite a quantidade do livro: </span>
-            <input type="number" placeholder="Ex: 2" @bind="tipoLivroFisico.Quantidade" />
-            <hr />
+          
+                    <div class="mb-3">
 
-            <button class="btn btn-primary" type="submit">Adicionar Livro</button>
-            <br />
+                        <label class="form-label">Autor do livro</label>
+                        <input type="text" class="form-control" placeholder="Ex: Machado de Assis..." @bind="tipoLivroFisico.Autor" />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Preço do livro</label>
+                        <input type="number" class="form-control" step="0.01" placeholder="Ex: 45" @bind="tipoLivroFisico.Preco" />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Tipo de capa do livro</label>
+                        <input type="text" class="form-control" placeholder="Ex: SIMPLES" @bind="tipoLivroFisico.TipoCapa" />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Quantidade do livro</label>
+                        <input type="number" class="form-control" placeholder="Ex: 2" @bind="tipoLivroFisico.Quantidade" />
+
+                    </div>
+
+
+                    <button class="btn btn-primary" type="submit">Adicionar Livro</button>
+                </div>
+            </div>
+
+            
 
         
             <ValidationSummary />
@@ -51,32 +93,54 @@
 
             <DataAnnotationsValidator />
 
-            <span>Digite o ID do livro: </span>
-            <input type="number" placeholder="Ex: 2" @bind="tipoLivroDigital.ID" />
-            <hr />
+            <div class="card shadow-sm" style="max-width: 600px;">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">ID do livro</label>
+                        <input type="number" class="form-control" placeholder="Ex: 9" @bind="tipoLivroDigital.ID" />
 
-            <span>Digite o nome do livro: </span>
-            <input type="text" placeholder="Ex : Five Nights at Freddy's" @bind="tipoLivroDigital.Nome" />
-            <hr />
+                    </div>
 
-            <span>Digite o autor do livro: </span>
-            <input type="text" placeholder="Ex: " @bind="tipoLivroDigital.Autor" />
-            <hr />
 
-            <span>Digite o preço do livro: </span>
-            <input type="number"  step="0.01" placeholder="Ex: 24,76" @bind="tipoLivroDigital.Preco" />
-            <hr />
+                    <div class="mb-3">
+                        <label class="form-label">Nome do livro</label>
+                        <input type="text" class="form-control" placeholder="Ex: Dom Casmurro" @bind="tipoLivroDigital.Nome" />
 
-            <span>Digite o formato do livro: </span>
-            <input type="text" placeholder="Ex: PDF" @bind="tipoLivroDigital.Formato" />
-            <hr />
+                    </div>
 
-            <span>Digite a quantidade do livro: </span>
-            <input type="number" placeholder="Ex: 2" @bind="tipoLivroDigital.Quantidade" />
-            <hr />
+          
+                    <div class="mb-3">
 
-            <button class="btn btn-primary" type="submit">Adicionar Livro</button>
-            <br />
+                        <label class="form-label">Autor do livro</label>
+                        <input type="text" class="form-control" placeholder="Ex: Machado de Assis..." @bind="tipoLivroDigital.Autor" />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Preço do livro</label>
+                        <input type="number" class="form-control" step="0.01" placeholder="Ex: 55" @bind="tipoLivroDigital.Preco" />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Formato do livro</label>
+                        <input type="text" class="form-control" placeholder="Ex: PDF" @bind="tipoLivroDigital.Formato" />
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Quantidade do livro</label>
+                        <input type="number" class="form-control" placeholder="Ex: 2" @bind="tipoLivroDigital.Quantidade" />
+
+                    </div>
+
+
+                    <button class="btn btn-primary" type="submit">Adicionar Livro</button>
+                </div>
+            </div>
 
 
 
@@ -88,26 +152,6 @@
 
     
 
-    
-
-
-
-
-
-    @if (!string.IsNullOrWhiteSpace(mensagem))
-    {
-        if (sucesso)
-        {
-            <div class="alert alert-success">@mensagem</div>
-        }
-        else
-        {
-            <div class="alert alert-danger">@mensagem</div>
-        }
-
-
-
-    }
 
 
 @code {

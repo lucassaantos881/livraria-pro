@@ -7,13 +7,11 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 
-<h3>Pedidos</h3>
+<h3 class="mb-3">Pedidos</h3>
 
-<a href="/cadastrar-pedido" class="btn btn-primary">
+<a href="/cadastrar-pedido" class="btn btn-primary mb-4">
     + Novo Pedido
 </a>
-
-<hr/>
 
 @if (pedidos == null)
 {
@@ -21,18 +19,17 @@
 }
 else
 {
-    <table class="table">
+    <table class="table table-hover table-striped align-middle">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Data Pedido</th>
                 <th>Nome</th>
-                <th>Status Pedido</th>
+                <th>Status</th>
                 <th>Telefone</th>
+                <th>Ações</th>
             </tr>
-
         </thead>
-
         <tbody>
             @foreach (var pedido in pedidos!)
             {
@@ -40,72 +37,90 @@ else
                     <td>@pedido.Id</td>
                     <td>@pedido.DataPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                     <td>@pedido.NomeCliente</td>
-                    <td>@pedido.StatusPedido</td>
+                    <td>
+                        <span class="badge bg-secondary">@pedido.StatusPedido</span>
+                    </td>
                     <td>@pedido.TelefoneCliente</td>
-
-                    <button class="btn-link" @onclick="() => ConfirmarExclusao(pedido.Id)">🗑️</button>
-               
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarExclusao(pedido.Id)">
+                            Excluir
+                        </button>
+                    </td>
                 </tr>
             }
-
         </tbody>
     </table>
 
-    <hr />
+    <hr class="my-4" />
 
-    <h3>Buscar Pedido por ID</h3>
-    <input @bind="idBusca" placeholder="ID do Pedido" />
+    <h4 class="mb-3">Buscar Pedido por ID</h4>
 
-    <button class="btn btn-primary" @onclick="AnalisarPedido">Buscar</button>
+    <div class="d-flex gap-2 mb-4" style="max-width: 400px;">
+        <input class="form-control" @bind="idBusca" placeholder="ID do Pedido" />
+        <button class="btn btn-primary" @onclick="AnalisarPedido">Buscar</button>
+    </div>
 
-    <hr />
+    @if (!string.IsNullOrWhiteSpace(mensagem))
+    {
+        <div class="alert @(sucesso ? "alert-success" : "alert-danger")">@mensagem</div>
+    }
 
     @if (pedidoLocalizado != null)
     {
-        <h4>Pedido Encontrado</h4>
-        <p>ID: @pedidoLocalizado.Id</p>
-        <p>Data do Pedido: @pedidoLocalizado.DataPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
-        <p>Nome do Cliente: @pedidoLocalizado.NomeCliente</p>
-        <p>Status do Pedido: @pedidoLocalizado.StatusPedido</p>
-        <p>Telefone do Cliente: @pedidoLocalizado.TelefoneCliente</p>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <strong>Pedido #@pedidoLocalizado.Id</strong>
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Data:</strong> @pedidoLocalizado.DataPedido.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                <p class="mb-1"><strong>Cliente:</strong> @pedidoLocalizado.NomeCliente</p>
+                <p class="mb-1"><strong>Telefone:</strong> @pedidoLocalizado.TelefoneCliente</p>
+                <p class="mb-3">
+                    <strong>Status:</strong>
+                    <span class="badge bg-secondary">@pedidoLocalizado.StatusPedido</span>
+                </p>
 
-        if (pedidoLocalizado.ItemPedido.Count > 0)
-        {
-            <p>Items do Pedido: @pedidoLocalizado.ItemPedido.Count</p>
+                @if (pedidoLocalizado.ItemPedido.Count > 0)
+                {
+                    <h6>Itens do pedido (@pedidoLocalizado.ItemPedido.Count)</h6>
 
-            @foreach (var item in pedidoLocalizado.ItemPedido)
-            {
-                <ul>
-                    <li>ID DO LIVRO: @item.LivroId -- PREÇO UNITÁRIO: R$@item.PrecoUnitario.ToString("N2") -- QUANTIDADE LIVROS: @item.QuantidadeLivros</li>
-                </ul>
-            }
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Livro (ID)</th>
+                                <th>Preço unitário</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in pedidoLocalizado.ItemPedido)
+                            {
+                                <tr>
+                                    <td>@item.LivroId</td>
+                                    <td>R$ @item.PrecoUnitario.ToString("N2")</td>
+                                    <td>@item.QuantidadeLivros</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
 
-            <p>Calcular Total: R$@pedidoLocalizado.CalcularTotal().ToString("N2")</p>
+                    <p class="fs-5 mb-3">
+                        <strong>Total: R$ @pedidoLocalizado.CalcularTotal().ToString("N2")</strong>
+                    </p>
 
-            <button class="btn btn-primary" @onclick="() => ConfirmarDespacho(pedidoLocalizado.Id)">Despachar Pedido</button>
-
-             @if (!string.IsNullOrWhiteSpace(mensagem))
-        {
-            @if (sucesso)
-            {
-                <div class="alert alert-success">@mensagem</div>
-            }
-            else
-            {
-                <div class="alert alert-danger">@mensagem</div>
-            }
-            }
-        }
-        
-
-
-        
-
-        
-
+                    <button class="btn btn-success" @onclick="() => ConfirmarDespacho(pedidoLocalizado.Id)">
+                        Despachar Pedido
+                    </button>
+                }
+                else
+                {
+                    <p class="text-muted">Este pedido não possui itens.</p>
+                }
+            </div>
+        </div>
     }
-    
 }
+
 
 @code {
     private List<Pedido>? pedidos;
@@ -242,5 +257,7 @@ else
     {
         public string Error { get; set; } = string.Empty;
     }
+
+   
 }
 
